@@ -1,0 +1,11 @@
+myProject_LSP\GiftRepository.class
+myProject_LSP\AbstractEvent.class
+myProject_LSP\GiftController.class
+myProject_LSP\GiftSendCancelled.class
+myProject_LSP\config\kafka\KafkaProcessor.class
+myProject_LSP\Gift.class
+myProject_LSP\AbstractEvent$1.class
+myProject_LSP\GiftApplication.class
+myProject_LSP\OrderCancelled.class
+myProject_LSP\PolicyHandler.class
+myProject_LSP\GiftSended.class
