@@ -113,7 +113,7 @@ phases:
             scaleTargetRef:
               apiVersion: apps/v1
               kind: Deployment
-              name: $_PROJECT_NAME
+              name: $IMAGE_REPO_NAME
             minReplicas: 1
             maxReplicas: 3
             targetCPUUtilizationPercentage: 50
@@ -133,7 +133,7 @@ phases:
             name: dr-gift
             namespace: teamc
           spec:
-            host: $_PROJECT_NAME
+            host: $IMAGE_REPO_NAME
             trafficPolicy:
               connectionPool:
                 http:
