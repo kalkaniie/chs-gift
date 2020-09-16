@@ -65,8 +65,8 @@ phases:
             labels:
               app: $_PROJECT_NAME
           spec:
-            replicas: 5
-            minReadySeconds: 10
+            replicas: 1
+            minReadySeconds: 180
             strategy:
               type: RollingUpdate
               rollingUpdate:
@@ -114,15 +114,15 @@ phases:
           apiVersion: autoscaling/v1
           kind: HorizontalPodAutoscaler
           metadata:
-            name: skcchpa_cook
+            name: skcchpa_gift
             namespace: teamc
           spec:
             scaleTargetRef:
               apiVersion: apps/v1
               kind: Deployment
               name: $_PROJECT_NAME
-            minReplicas: 3
-            maxReplicas: 5
+            minReplicas: 1
+            maxReplicas: 3
             targetCPUUtilizationPercentage: 10
             #metrics:
             #- type: Resource
@@ -131,8 +131,27 @@ phases:
             #    target:
             #      type: Utilization
             #      averageUtilization: 10
-          #EOF
-          
+          EOF
+     - |  
+          cat <<EOF | kubectl apply -f -
+          apiVersion: networking.istio.io/v1alpha3
+          kind: DestinationRule
+          metadata:
+            name: dr-gift
+            namespace: teamc
+          spec:
+            host: $_PROJECT_NAME
+            trafficPolicy:
+              connectionPool:
+                http:
+                  http1MaxPendingRequests: 1
+                  maxRequestsPerConnection: 1
+              outlierDetection:
+                interval: 1s
+                consecutiveErrors: 1
+                baseEjectionTime: 10m
+                maxEjectionPercent: 100
+          EOF
 cache:
   paths:
     - '/root/.m2/**/*'
