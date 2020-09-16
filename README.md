@@ -1,4 +1,4 @@
-# Intensive Lv2. TeamC-gift
+# Intensive Lv2. TeamC-사은품(Gift)
 
 음식을 주문하고 요리하여 배달하고 사은품이 지급되는 현황을 확인 할 수 있는 CNA의 개발
 
@@ -339,8 +339,31 @@ metadata:
     targetCPUUtilizationPercentage: 10  # cpu사용율 10프로 초과 시 
 ```    
 * 부하테스트(Siege)를 활용한 부하 적용 후 서킷브레이킹 / 오토스케일 내역을 확인한다.
-![HPA, Circuit Breaker  SEIGE_STATUS](https://user-images.githubusercontent.com/54210936/93168766-9ced3800-f75e-11ea-9d6b-fdf37591b97a.jpg)
-![HPA  TOBE_STATUS](https://user-images.githubusercontent.com/54210936/93167897-95c52a80-f75c-11ea-8f0e-51a94332141b.jpg)
+```  
+HTTP/1.1 503     0.08 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.07 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.07 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.07 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.08 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.09 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.08 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.08 secs:       19 bytes ==> GET  /gifts
+HTTP/1.1 503     0.07 secs:       19 bytes ==> GET  /gifts
+siege aborted due to excessive socket failure; you
+can change the failure threshold in $HOME/ .siegerc
+
+Transactions:                  2505 hits
+Availability:                    70.40 %
+Elapsed time:                 23.86 secs
+Data transferred:               1.88 MB
+Response time:                 0.53 secs
+Transaction rate:             104.99 trans/sec
+Throughput:                     0.08 MB/sec
+Concurrency:                  61.38
+Successful transactions:       2505
+```  
+![gifts_circuitbreaker](https://user-images.githubusercontent.com/68719410/93346960-8551a480-f86f-11ea-8220-723f8e7d87e1.png)
+![gift_replica_3개_2](https://user-images.githubusercontent.com/68719410/93347885-8c2ce700-f870-11ea-86c2-f87a4c0284c7.png)
 
 </br>
 
