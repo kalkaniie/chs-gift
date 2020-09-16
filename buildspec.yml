@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_REPO_NAME: "point"
-    _PROJECT_NAME: "admin15-point"
+    IMAGE_REPO_NAME: "gift"
+    _PROJECT_NAME: "admin16-gift2"
 
 phases:
   install:
