@@ -1,4 +1,4 @@
-# Intensive Lv2. TeamC
+# Intensive Lv2. TeamC-gift
 
 음식을 주문하고 요리하여 배달하는 현황을 확인 할 수 있는 CNA의 개발
 
@@ -23,15 +23,17 @@
 
 # 서비스 시나리오
 
-음식을 주문하고, 요리현황 및 배달현황을 조회
+음식을 주문하고, 요리현황, 배달, 기프트발행 현황을 조회
 
 ## 기능적 요구사항
 
 1. 고객이 주문을 하면 주문정보를 바탕으로 요리가 시작된다.
-1. 요리가 완료되면 배달이 시작된다. 
+1. 고객이 주문을 하면 새로운 기프트가 발행된다.
+1. 요리가 완료되면 배달이 시작된다.
 1. 고객이 주문취소를 하게 되면 요리가 취소된다.
+1. 고객이 주문취소를 하게 되면 기프트 발행이 취소된다.
 1. 고객 주문에 재고가 없을 경우 주문이 취소된다. 
-1. 고객은 Mypage를 통해, 주문과 요리, 배달의 전체 상황을 조회할수 있다.
+1. 고객은 Mypage를 통해, 주문과 요리, 배달, 기프트발행의 전체 상황을 조회할수 있다.
 
 ## 비기능적 요구사항
 1. 장애격리
@@ -55,11 +57,13 @@
 1. 요리재고체크됨
 1. 요리완료
 1. 배달
+1. 기프트발행
+1. 기프트발행취소됨 
 
 
 ### 어그리게잇으로 묶기
 
-  * 고객의 주문(Order), 식당의 요리(Cook), 배달(Delivery)은 그와 연결된 command와 event 들에 의하여 트랙잭션이 유지되어야 하는 단위로 묶어 줌.
+  * 고객의 주문(Order), 식당의 요리(Cook), 배달(Delivery), 기프트(Gift) 은 그와 연결된 command와 event 들에 의하여 트랙잭션이 유지되어야 하는 단위로 묶어 줌.
 
 ### Policy 부착 
 
@@ -75,7 +79,9 @@
  * 주문이 취소되면, 요리취소 내용을 고객에게 전달한다.(ok)
  * 고객이 주문 시 재고량을 체크한다.(ok)
  * 재고가 없을 경우 주문이 취소된다.(ok)
- * 고객은 Mypage를 통해, 주문과 요리, 배달의 전체 상황을 조회할수 있다.(ok)
+ * 주문이 되면 기프트가 발행된다. (ok)
+ * 주문이 취소되면 기프트 발행을 취소한다. (ok)
+ * 고객은 Mypage를 통해, 주문과 요리, 배달, 기프트 발행의 전체 상황을 조회할수 있다.(ok)
 
 </br>
 </br>
@@ -99,18 +105,19 @@ import org.springframework.beans.BeanUtils;
 import java.util.List;
 
 @Entity
-@Table(name="Order_table")
-public class Order {
+@Table(name="Gift_table")
+public class Gift {
+
+    private static int giftQty=10;
+    private boolean giftFlowChk=true;
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
-    private Integer restaurantId;
-    private Integer restaurantMenuId;
-    private Integer customerId;
-    private Integer qty;
-    private Long modifiedDate;
+    private Long orderId;
     private String status;
+    private Long sendDate;
+    private String giftKind;
     
     ....
 }
@@ -119,7 +126,7 @@ public class Order {
 ```
 package myProject_LSP;
 import org.springframework.data.repository.PagingAndSortingRepository;
-public interface OrderRepository extends PagingAndSortingRepository<Order, Long>{
+public interface GiftRepository extends PagingAndSortingRepository<Gift, Long>{
 
 }
 ```
@@ -128,36 +135,79 @@ public interface OrderRepository extends PagingAndSortingRepository<Order, Long>
 ## 동기식 호출과 Fallback 처리
 
 분석단계에서의 조건 중 하나로 주문->취소 간의 호출은 트랜잭션으로 처리. 호출 프로토콜은 Rest Repository의 REST 서비스를 FeignClient 를 이용하여 호출.
-- 요리(cook) 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+- 사은품(gift) 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
 
 ```
-@FeignClient(name="cook", url="${api.url.cook}")
-public interface CancellationService {
+@FeignClient(name="gift", url="${api.url.gift}")
+public interface GiftService {
 
-  @RequestMapping(method= RequestMethod.GET, path="/cancellations")
-  public void cancel(@RequestBody Cancellation cancellation);
+    @RequestMapping(method= RequestMethod.POST, path="/gifts")
+    public void giftSend(@RequestBody Gift gift);
 
 }
 ```
 
-- 주문이 취소 될 경우 Cancellation 현황에 취소 내역을 접수한다.
+- 주문이 접수 될 경우 사은품 현황에 신규발행 내역을 접수한다.
 ```
-@PrePersist
-public void onPrePersist(){
-   CookCancelled cookCancelled = new CookCancelled();
-   BeanUtils.copyProperties(this, cookCancelled);
-   cookCancelled.setStatus("COOK : ORDER CANCELED");
-   cookCancelled.publishAfterCommit();
-```
+   @PostPersist
+    public void onPostPersist(){
+        if("GIFT : GIFT SENDED".equals(this.getStatus())){
+            //ORDER -> GIFT SEND 경우
+            GiftSended giftSended = new GiftSended();
+            BeanUtils.copyProperties(this, giftSended);
+            giftSended.publishAfterCommit();
+        }
+        
+```        
+
 
 </br>
 
 ## 비동기식 호출과 Saga Pattern
 
-주문 접수 및 배달 접수, 재고부족으로 인한 주문 취소는 비동기식으로 처리하여 시스템 상황에 따라 접수 및 취소가 블로킹 되지 않도록 처리 한다. 
-요리 단계 접수시에는 재고를 체크하고 재고가 부족할 경우 주문단계로 비동기식 요리 불가 발행(publish). 
+신규 사은품 발행 및 신규 사은품 취소는 비동기식으로 처리하여 시스템 상황에 따라 접수 및 취소가 블로킹 되지 않도록 처리 한다. 
+saga pattern : 
+1. 고객이 주문 시 gift(사은품)으로 전달되어 신규 사은품이 접수된다.
+1. 사은품이 접수 완료 되면 주문상태 order로 전달된다.
+1. 주문정보 상태가 업데이트 된다. (pub/sub)
  
 ```
+
+# 고객이 주문 시 사은품(gift)이 발행된다.
+ @PostPersist
+    public void onPostPersist(){
+        Ordered ordered = new Ordered();
+        BeanUtils.copyProperties(this, ordered);
+
+        System.out.println(ordered.getStatus()+ "#######################33");
+        if(!"ORDER : COOK CANCELED".equals(ordered.getStatus())){
+            ordered.publishAfterCommit();
+
+            /*수정*/
+            Gift gift = new Gift();
+            gift.setOrderId(this.getId());
+            gift.setStatus("ORDER : GIFT SEND");
+
+            OrderApplication.applicationContext.getBean(myProject_LSP.external.GiftService.class).giftSend(gift);
+        }
+
+# 사은품이 발행이 완료 되면 주문상태 order로 전달된다.
+    @PrePersist
+    public void onPrePersist(){
+        if("ORDER : GIFT SEND".equals(this.getStatus())){
+            this.setGiftKind("Candy");
+            this.setStatus("GIFT : GIFT SENDED");
+            this.setSendDate(System.currentTimeMillis());
+            
+ # 주문정보 상태가 업데이트 된다.
+     @PreUpdate
+    public void onPreUpdate(){
+        if("ORDER : GIFT SEND".equals(this.getStatus())){
+            this.setGiftKind("Candy");
+            this.setStatus("GIFT : GIFT SENDED");
+            this.setSendDate(System.currentTimeMillis());
+
+
 # 주문시 재고량 체크하는 Cook 로직
 @Entity
 @Table(name="Cook_table")
@@ -233,6 +283,10 @@ spring:
           uri: http://mypage:8080
           predicates:
             - Path= /mypages/**
+        - id: gift
+          uri: http://gift:8080
+          predicates:
+            - Path= /gifts/**
       globalcors:
         corsConfigurations:
           '[/**]':
@@ -247,57 +301,47 @@ spring:
 server:
   port: 8080
 ```
-![gateway_LoadBalancer (1)](https://user-images.githubusercontent.com/54210936/93281154-7aaef500-f806-11ea-997d-c70dc6a81056.png)
-![gateway_LoadBalancer_delivery (1)](https://user-images.githubusercontent.com/54210936/93281029-1e4bd580-f806-11ea-9b95-70b9985b6fde.png)
+![gateway_loadbalancer](https://user-images.githubusercontent.com/68719410/93343128-18d4a680-f86b-11ea-8291-b480e3deaaee.png)
+![gift수행](https://user-images.githubusercontent.com/68719410/93343219-34d84800-f86b-11ea-858c-9572bbdf730b.png)
 
 </br>
 
 ## CQRS
 기존 코드에 영향도 없이 mypage 용 materialized view 구성한다. 고객은 주문 접수, 요리 상태, 배송현황 등을 한개의 페이지에서 확인 할 수 있게 됨.</br>
 ```
-# 주문 내역 mypage에 insert
-   @StreamListener(KafkaProcessor.INPUT)
-    public void whenOrdered_then_CREATE_1 (@Payload Ordered ordered) {
-        try {
-            if (ordered.isMe()) {
-                // view 객체 생성
-                Mypage mypage = new Mypage();
-                // view 객체에 이벤트의 Value 를 set 함
-                mypage.setRestaurantId(ordered.getRestaurantId());
-                mypage.setRestaurantMenuId(ordered.getRestaurantMenuId());
-                mypage.setCustomerId(ordered.getCustomerId());
-                mypage.setQty(ordered.getQty());
-                mypage.setOrderId(ordered.getId());
-                mypage.setOrderStatus(ordered.getStatus());
-                // view 레파지 토리에 save
-                mypageRepository.save(mypage);
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
-
-# 요리내역(Cook) mypage 업데이트
+# 사은품 내역 mypage에 insert
     @StreamListener(KafkaProcessor.INPUT)
-    public void whenCooked_then_UPDATE_1(@Payload Cooked cooked) {
+    public void whenGiftSended_then_UPDATE_6(@Payload GiftSended giftSended) {
+        System.out.println("##############168@@@@@");
+
         try {
-            if (cooked.isMe()) {
+            if (giftSended.isMe()) {
                 // view 객체 조회
-                List<Mypage> mypageList = mypageRepository.findByOrderId(cooked.getOrderId());
+                Thread.sleep(1000);
+
+                List<Mypage> mypageList = mypageRepository.findByOrderId(giftSended.getOrderId());
+                System.out.println("#####################173");
+                System.out.println("################" + giftSended.getId());
+                System.out.println("################" + giftSended.getStatus());
+                System.out.println("################" + giftSended.getGiftKind());
+
+
                 for(Mypage mypage : mypageList){
                     // view 객체에 이벤트의 eventDirectValue 를 set 함
-                    mypage.setCookId(cooked.getId());
-                    mypage.setCookStatus(cooked.getStatus());
+
+                    System.out.println("@@@@@@@@@@@@@@@@@@@");
+                    System.out.println(mypage.getOrderId()+"!!!!!!!!!!!!");
+
+                    mypage.setGiftId(giftSended.getId());
+                    mypage.setGiftStatus(giftSended.getStatus());
+                    mypage.setGiftSendDate(giftSended.getSendDate());
+                    mypage.setGiftKind(giftSended.getGiftKind());
+
+
                     // view 레파지 토리에 save
                     mypageRepository.save(mypage);
-                }
-            }
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-    }
  ```
-![cqrs](https://user-images.githubusercontent.com/54210936/93281210-987c5a00-f806-11ea-835b-2cea09bf6466.png)
+![CQRS](https://user-images.githubusercontent.com/68719410/93343798-e5dee280-f86b-11ea-944d-ee6610254eee.png)
 
 </br>
 </br>
@@ -311,11 +355,12 @@ server:
   * Github에 Codebuild를 위한 yml 파일을 업로드하고, codebuild와 연동 함
   * 각 마이크로서비스의 build 스펙
   ```
-    https://github.com/dew0327/final-cna-order/blob/master/buildspec.yml
-    https://github.com/dew0327/final-cna-cook/blob/master/buildspec.yml
-    https://github.com/dew0327/final-cna-delivery/blob/master/buildspec.yml
-    https://github.com/dew0327/final-cna-gateway/blob/master/buildspec.yml
-    https://github.com/dew0327/final-cna-mypage/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-order/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-cook/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-delivery/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-gateway/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-mypage/blob/master/buildspec.yml
+    https://github.com/kalkaniie/chs-gift/blob/master/buildspec.yml
   ```
   
 </br>
@@ -325,7 +370,7 @@ server:
 * 서킷 브레이킹 :
 주문이 과도할 경우 CB 를 통하여 장애격리. 500 에러가 5번 발생하면 10분간 CB 처리하여 100% 접속 차단
 ```
-# AWS codebuild에 설정(https://github.com/dew0327/final-cna-order/blob/master/buildspec.yml)
+# AWS codebuild에 설정(https://github.com/kalkaniie/chs-gift/blob/master/buildspec.yml)
  http:
    http1MaxPendingRequests: 1   # 연결을 기다리는 request 수를 1개로 제한 (Default 
    maxRequestsPerConnection: 1  # keep alive 기능 disable
@@ -342,13 +387,13 @@ CPU사용률 10% 초과 시 replica를 5개까지 확장해준다. 상용에서�
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: skcchpa-order
+  name: skcchpa-gift
   namespace: teamc
   spec:
     scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: $_PROJECT_NAME                # order (주문) 서비스 HPA 설정
+    name: $IMAGE_REPO_NAME              # gift (사은품) 서비스 HPA 설정
     minReplicas: 3                      # 최소 3개
     maxReplicas: 5                      # 최대 5개
     targetCPUUtilizationPercentage: 10  # cpu사용율 10프로 초과 시 
@@ -366,9 +411,9 @@ metadata:
   
 
 ```
-# AWS codebuild에 설정(https://github.com/dew0327/final-cna-cook/blob/master/buildspec.yml)
+# AWS codebuild에 설정(https://github.com/kalkaniie/chs-gift/blob/master/buildspec.yml)
   spec:
-    replicas: 5
+    replicas: 2
     minReadySeconds: 10   # 최소 대기 시간 10초
     strategy:
       type: RollingUpdate
