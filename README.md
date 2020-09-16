@@ -386,14 +386,14 @@ Successful transactions:       2505
 
 ```
 
-- 새버전으로의 배포 시작(V3로 배포)
-![ZeroDownTime  console - pod change status](https://user-images.githubusercontent.com/54210936/93277970-4c2d1c00-f7fe-11ea-87ce-82cdd77e84ac.jpg)
+- 새버전으로의 배포 시작(V1로 배포)
+![gift_v1_image](https://user-images.githubusercontent.com/68719410/93348947-d498d480-f871-11ea-97d3-8e7a09cb3759.png)
 
 - siege를 이용한 부하 적용. Availability가 100% 미만으로 떨어짐. 쿠버네티스가 새로 올려진 서비스를 Ready 상태로 인식하여 서비스 유입을 진행 하였음. Readiness Probe 설정하여 조치 필요.
-![ZeroDownTime  SEIGE_STATUS](https://user-images.githubusercontent.com/54210936/93277995-6109af80-f7fe-11ea-9ebf-5de918c150cc.jpg)
+![siege_gift_origin](https://user-images.githubusercontent.com/68719410/93349041-f3976680-f871-11ea-82ef-374f16fb6dc8.png)
 
-- 새버전 배포 확인(V3 적용)
-![ZeroDownTime  console - pod describe](https://user-images.githubusercontent.com/54210936/93278015-6d8e0800-f7fe-11ea-82d1-dc80b96b601c.jpg)
+- 새버전 배포 확인(V1 적용)
+![무중단running_v1](https://user-images.githubusercontent.com/68719410/93349106-090c9080-f872-11ea-906c-fc858d891f04.png)
 
 
 - Readiness Probe 설정을 통한 ZeroDownTime 설정.
