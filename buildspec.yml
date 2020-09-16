@@ -44,38 +44,38 @@ phases:
           apiVersion: v1
           kind: Service
           metadata:
-            name: $_PROJECT_NAME
+            name: $IMAGE_REPO_NAME
             namespace: teamc
             labels:
-              app: $_PROJECT_NAME
+              app: $IMAGE_REPO_NAME
           spec:
             ports:
               - port: 8080
                 targetPort: 8080
             selector:
-              app: $_PROJECT_NAME
+              app: $IMAGE_REPO_NAME
           EOF
       - |
           cat  <<EOF | kubectl apply -f -
           apiVersion: apps/v1
           kind: Deployment
           metadata:
-            name: $_PROJECT_NAME
+            name: $IMAGE_REPO_NAME
             namespace: teamc
             labels:
-              app: $_PROJECT_NAME
+              app: $IMAGE_REPO_NAME
           spec:
             replicas: 1
             selector:
               matchLabels:
-                app: $_PROJECT_NAME
+                app: $IMAGE_REPO_NAME
             template:
               metadata:
                 labels:
-                  app: $_PROJECT_NAME
+                  app: $IMAGE_REPO_NAME
               spec:
                 containers:
-                  - name: $_PROJECT_NAME
+                  - name: $IMAGE_REPO_NAME
                     image: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$_PROJECT_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION
                     ports:
                       - containerPort: 8080
