@@ -389,9 +389,6 @@ Successful transactions:       2505
 - 새버전으로의 배포 시작(V1로 배포)
 ![gift_v1_image](https://user-images.githubusercontent.com/68719410/93348947-d498d480-f871-11ea-97d3-8e7a09cb3759.png)
 
-- siege를 이용한 부하 적용. Availability가 100% 미만으로 떨어짐. 쿠버네티스가 새로 올려진 서비스를 Ready 상태로 인식하여 서비스 유입을 진행 하였음. Readiness Probe 설정하여 조치 필요.
-![siege_gift_origin](https://user-images.githubusercontent.com/68719410/93349041-f3976680-f871-11ea-82ef-374f16fb6dc8.png)
-
 - 새버전 배포 확인(V1 적용)
 ![무중단running_v1](https://user-images.githubusercontent.com/68719410/93349106-090c9080-f872-11ea-906c-fc858d891f04.png)
 
