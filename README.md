@@ -265,26 +265,13 @@ server:
 # 사은품 내역 mypage에 insert
     @StreamListener(KafkaProcessor.INPUT)
     public void whenGiftSended_then_UPDATE_6(@Payload GiftSended giftSended) {
-        System.out.println("##############168@@@@@");
-
         try {
             if (giftSended.isMe()) {
                 // view 객체 조회
-                Thread.sleep(1000);
-
+                
                 List<Mypage> mypageList = mypageRepository.findByOrderId(giftSended.getOrderId());
-                System.out.println("#####################173");
-                System.out.println("################" + giftSended.getId());
-                System.out.println("################" + giftSended.getStatus());
-                System.out.println("################" + giftSended.getGiftKind());
-
-
                 for(Mypage mypage : mypageList){
                     // view 객체에 이벤트의 eventDirectValue 를 set 함
-
-                    System.out.println("@@@@@@@@@@@@@@@@@@@");
-                    System.out.println(mypage.getOrderId()+"!!!!!!!!!!!!");
-
                     mypage.setGiftId(giftSended.getId());
                     mypage.setGiftStatus(giftSended.getStatus());
                     mypage.setGiftSendDate(giftSended.getSendDate());
