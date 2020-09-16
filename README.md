@@ -1,6 +1,6 @@
 # Intensive Lv2. TeamC-gift
 
-음식을 주문하고 요리하여 배달하는 현황을 확인 할 수 있는 CNA의 개발
+음식을 주문하고 요리하여 배달하고 사은품이 지급되는 현황을 확인 할 수 있는 CNA의 개발
 
 # Table of contents
 
@@ -23,17 +23,17 @@
 
 # 서비스 시나리오
 
-음식을 주문하고, 요리현황, 배달, 기프트발행 현황을 조회
+음식을 주문하고, 요리현황, 배달, 사은품지급 현황을 조회
 
 ## 기능적 요구사항
 
 1. 고객이 주문을 하면 주문정보를 바탕으로 요리가 시작된다.
-1. 고객이 주문을 하면 새로운 기프트가 발행된다.
+1. 고객이 주문을 하면 신규 사은품이 지급된다.
 1. 요리가 완료되면 배달이 시작된다.
 1. 고객이 주문취소를 하게 되면 요리가 취소된다.
-1. 고객이 주문취소를 하게 되면 기프트 발행이 취소된다.
+1. 고객이 주문취소를 하게 되면 사은품 지급이 취소된다.
 1. 고객 주문에 재고가 없을 경우 주문이 취소된다. 
-1. 고객은 Mypage를 통해, 주문과 요리, 배달, 기프트발행의 전체 상황을 조회할수 있다.
+1. 고객은 Mypage를 통해, 주문과 요리, 배달, 사은품지급의 전체 상황을 조회할수 있다.
 
 ## 비기능적 요구사항
 1. 장애격리
@@ -57,13 +57,13 @@
 1. 요리재고체크됨
 1. 요리완료
 1. 배달
-1. 기프트발행
-1. 기프트발행취소됨 
+1. 사은품지급됨
+1. 사은품지급취소됨 
 
 
 ### 어그리게잇으로 묶기
 
-  * 고객의 주문(Order), 식당의 요리(Cook), 배달(Delivery), 기프트(Gift) 은 그와 연결된 command와 event 들에 의하여 트랙잭션이 유지되어야 하는 단위로 묶어 줌.
+  * 고객의 주문(Order), 식당의 요리(Cook), 배달(Delivery), 사은품(Gift) 은 그와 연결된 command와 event 들에 의하여 트랙잭션이 유지되어야 하는 단위로 묶어 줌.
 
 ### Policy 부착 
 
@@ -79,9 +79,9 @@
  * 주문이 취소되면, 요리취소 내용을 고객에게 전달한다.(ok)
  * 고객이 주문 시 재고량을 체크한다.(ok)
  * 재고가 없을 경우 주문이 취소된다.(ok)
- * 주문이 되면 기프트가 발행된다. (ok)
- * 주문이 취소되면 기프트 발행을 취소한다. (ok)
- * 고객은 Mypage를 통해, 주문과 요리, 배달, 기프트 발행의 전체 상황을 조회할수 있다.(ok)
+ * 주문이 되면 사은품이 지급된다. (ok)
+ * 주문이 취소되면 사은품지급이 취소한다. (ok)
+ * 고객은 Mypage를 통해, 주문과 요리, 배달, 사은품지급의 전체 상황을 조회할수 있다.(ok)
 
 </br>
 </br>
@@ -147,7 +147,7 @@ public interface GiftService {
 }
 ```
 
-- 주문이 접수 될 경우 사은품 현황에 신규발행 내역을 접수한다.
+- 주문이 접수 될 경우 사은품지급 현황에 신규지급 내역을 접수한다.
 ```
    @PostPersist
     public void onPostPersist(){
@@ -165,15 +165,15 @@ public interface GiftService {
 
 ## 비동기식 호출과 Saga Pattern
 
-신규 사은품 발행 및 신규 사은품 취소는 비동기식으로 처리하여 시스템 상황에 따라 접수 및 취소가 블로킹 되지 않도록 처리 한다. 
+신규 사은품지급 및 신규 사은품지급 취소는 비동기식으로 처리하여 시스템 상황에 따라 접수 및 취소가 블로킹 되지 않도록 처리 한다. 
 saga pattern : 
-1. 고객이 주문 시 gift(사은품)으로 전달되어 신규 사은품이 접수된다.
-1. 사은품이 접수 완료 되면 주문상태 order로 전달된다.
+1. 고객이 주문 시 gift(사은품)으로 전달되어 신규 사은품이 지급된다.
+1. 사은품 지급 완료 되면 주문상태를 order로 전달한다.
 1. 주문정보 상태가 업데이트 된다. (pub/sub)
  
 ```
 
-# 고객이 주문 시 사은품(gift)이 발행된다.
+# 고객이 주문 시 사은품(gift)이 지급된다.
  @PostPersist
     public void onPostPersist(){
         Ordered ordered = new Ordered();
@@ -191,7 +191,7 @@ saga pattern :
             OrderApplication.applicationContext.getBean(myProject_LSP.external.GiftService.class).giftSend(gift);
         }
 
-# 사은품이 발행이 완료 되면 주문상태 order로 전달된다.
+# 사은품 지급이 완료 되면 주문상태를 order로 전달한다.
     @PrePersist
     public void onPrePersist(){
         if("ORDER : GIFT SEND".equals(this.getStatus())){
@@ -206,53 +206,6 @@ saga pattern :
             this.setGiftKind("Candy");
             this.setStatus("GIFT : GIFT SENDED");
             this.setSendDate(System.currentTimeMillis());
-
-
-# 주문시 재고량 체크하는 Cook 로직
-@Entity
-@Table(name="Cook_table")
-public class Cook {
-    private boolean flowchk = true;
-    ....
-    @PostPersist
-    public void onPostPersist(){
-        if(flowchk) {   // 요리를 할 수 있는 재고가 있을 때 요리를 시작한다
-            Cooked cooked = new Cooked();
-            BeanUtils.copyProperties(this, cooked);
-            this.setStatus("COOK : ORDER RECEIPT");
-            this.qty--;
-            cooked.publishAfterCommit();
-        }else{
-            CookQtyChecked cookQtyChecked = new CookQtyChecked();
-            BeanUtils.copyProperties(this, cookQtyChecked);
-            cookQtyChecked.publishAfterCommit();
-        }
-    }
-
-    @PrePersist
-    public void onPrePersist(){
-        // 요리를 할 수 있는 재고가 없을 때 요리를 시작한다
-        if(this.getQty() <= 0) {
-            this.setStatus("COOK : QTY OVER");
-            flowchk = false;
-        }
-    }
-}
-
-...
-# 주문서비스의 Cancel 설정
-    @Autowired
-    OrderRepository orderRepository;
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverCookQtyChecked_CookCancelUpdate(@Payload CookQtyChecked cookQtyChecked){
-        if(cookQtyChecked.isMe()){
-            Optional<Order> orderOptional = orderRepository.findById(cookQtyChecked.getOrderId());
-            Order order = orderOptional.get();
-            order.setStatus("ORDER : QTY OVER CANCELED");
-            orderRepository.save(order);
-        }
-    }
 ```
 
 </br>
@@ -307,7 +260,7 @@ server:
 </br>
 
 ## CQRS
-기존 코드에 영향도 없이 mypage 용 materialized view 구성한다. 고객은 주문 접수, 요리 상태, 배송현황 등을 한개의 페이지에서 확인 할 수 있게 됨.</br>
+기존 코드에 영향도 없이 mypage 용 materialized view 구성한다. 고객은 주문 접수, 요리 상태, 배송현황, 사은품 지급현황 등을 한개의 페이지에서 확인 할 수 있게 됨.</br>
 ```
 # 사은품 내역 mypage에 insert
     @StreamListener(KafkaProcessor.INPUT)
