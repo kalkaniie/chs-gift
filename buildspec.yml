@@ -66,12 +66,6 @@ phases:
               app: $_PROJECT_NAME
           spec:
             replicas: 1
-            minReadySeconds: 180
-            strategy:
-              type: RollingUpdate
-              rollingUpdate:
-                maxSurge: 1
-                maxUnavailable: 0
             selector:
               matchLabels:
                 app: $_PROJECT_NAME
@@ -92,7 +86,7 @@ phases:
                         cpu: 200m
                     volumeMounts:
                       - mountPath: "/mnt/aws"
-                        name: volume
+                        name: volume                    
                     readinessProbe:
                       tcpSocket:
                         port: 8080
@@ -102,19 +96,18 @@ phases:
                       tcpSocket:
                         port: 8080
                       initialDelaySeconds: 20
-                      periodSeconds: 30
+                      periodSeconds: 30    
                 volumes:
                   - name: volume
                     persistentVolumeClaim:
-                      claimName: aws-efs         
+                      claimName: aws-efs  
           EOF
-          
       - |
           cat <<EOF | kubectl apply -f -
           apiVersion: autoscaling/v1
           kind: HorizontalPodAutoscaler
           metadata:
-            name: skcchpa_gift
+            name: skcchpa-gift
             namespace: teamc
           spec:
             scaleTargetRef:
@@ -123,7 +116,7 @@ phases:
               name: $_PROJECT_NAME
             minReplicas: 1
             maxReplicas: 3
-            targetCPUUtilizationPercentage: 10
+            targetCPUUtilizationPercentage: 50
             #metrics:
             #- type: Resource
             #  resource:
