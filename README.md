@@ -48,7 +48,7 @@
 # 분석/설계
 
 ## Event Storming 결과
-* MSAEz 로 모델링한 이벤트스토밍 결과 : http://www.msaez.io/#/storming/t5Z5EXdDP0UOZDvGzeNH61hF8qG3/mine/52e31337a76ddeacc1d288ea11e24158/-MH4jm58lJNE_9tgT82F
+* MSAEz 로 모델링한 이벤트스토밍 결과 : http://www.msaez.io/#/storming/ckYIP4C7M2X8xqx0UvgE7lWE4Yq1/mine/eb4fba62e6af9c7f9069e28ac9b3f83b/-MHBHte6QeP1F2SNGp2w
 ![EventStorming_modeling](https://user-images.githubusercontent.com/68719410/93336949-68af6f80-f863-11ea-8c55-e76fd2516f4b.png)
 
 ### 이벤트 도출
@@ -425,12 +425,14 @@ volumes:                                # 로그 파일 생성을 위한 EFS, PV
 ## SelfHealing
 운영 안정성의 확보를 위해 마이크로서비스가 아웃된 뒤에 다시 프로세스가 올라오는 환경을 구축한다. 프로세스가 죽었을 때 다시 기동됨을 확인함.
 ```
-#AWS의 각 codebuild에 설정(https://github.com/dew0327/final-cna-order/blob/master/buildspec.yml)
+#AWS의 각 codebuild에 설정(https://github.com/kalkaniie/chs-cook/blob/master/buildspec.yml)
 livenessProbe:
-  tcpSocket:
-  port: 8080
-  initialDelaySeconds: 20     # 서비스 어플 기동 후 20초 뒤 시작
-  periodSeconds: 3            # 3초 주기로 livenesProbe 실행 
+  exec:
+   command:
+   - cat
+   - /mnt/aws/logs/cook-application.log
+  initialDelaySeconds: 20  # 서비스 어플 기동 후 20초 뒤 시작
+  periodSeconds: 30  # 30초 주기로 livenesProbe 실행
 ```
 ![self healing_2](https://user-images.githubusercontent.com/68719410/93357433-4295c980-f87b-11ea-98b6-6f3f37a25466.png)
 ![self healing_3](https://user-images.githubusercontent.com/68719410/93357510-57725d00-f87b-11ea-8feb-40e174494c5f.png)
@@ -445,8 +447,8 @@ livenessProbe:
 팀프로젝트 구성을 위해 사용한 계정 정보 및 클러스터 명, Github 주소 등의 내용 공유 
 * AWS 계정 명 : TeamC
 ```
-Region : ap-northeast2
-EFS : EFS-teamc (fs-96929df7)
+Region : ap-northeast-1
+EFS : EFS-teamc (fs-29564908)
 EKS : TeamC-final
 ECR : order / delivery / cook / mypage / gateway
 Codebuild : order / delivery / cook / mypage / gateway
