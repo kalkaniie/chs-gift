@@ -534,7 +534,7 @@ livenessProbe:
 # 첨부
 팀프로젝트 구성을 위해 사용한 계정 정보 및 클러스터 명, Github 주소 등의 내용 공유 
 
-* AWS 계정 명 : 천현수
+* AWS 계정 명 : 천현수 (skcc-class : admin16)
 ```
 Region : ap-northeast-1 (도쿄)
 EFS : EFS-teamc (fs-29564908)
