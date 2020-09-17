@@ -282,6 +282,7 @@ server:
                     mypageRepository.save(mypage);
  ```
 ![CQRS](https://user-images.githubusercontent.com/68719410/93343798-e5dee280-f86b-11ea-944d-ee6610254eee.png)
+![mypage-giftsended](https://user-images.githubusercontent.com/68719410/93404836-3a16b080-f8c6-11ea-8308-373150ce52f6.png)
 
 </br>
 </br>
