@@ -1,4 +1,4 @@
-# Intensive Lv2. TeamC-사은품(Gift)
+# Intensive Lv2. TeamC-천현수 사은품(Gift) 서비스 추가
 
 음식을 주문하고 요리하여 배달하고 사은품이 지급되는 현황을 확인 할 수 있는 CNA의 개발
 
@@ -533,13 +533,33 @@ livenessProbe:
 
 # 첨부
 팀프로젝트 구성을 위해 사용한 계정 정보 및 클러스터 명, Github 주소 등의 내용 공유 
+
+* AWS 계정 명 : 천현수
+```
+Region : ap-northeast-1 (도쿄)
+EFS : EFS-teamc (fs-29564908)
+EKS : admin16-cluster
+ECR : order / delivery / cook / mypage / gateway / gift
+Codebuild : order / delivery / cook / mypage / gateway / gift
+```
+* Github :</br>
+```
+https://github.com/kalkaniie/chs-order.git
+https://github.com/kalkaniie/chs-delivery.git
+https://github.com/kalkaniie/chs-cook.git
+https://github.com/kalkaniie/chs-gateway.git
+https://github.com/kalkaniie/chs-mypage.git
+https://github.com/kalkaniie/chs-gift.git
+
+```
+
 * AWS 계정 명 : TeamC
 ```
-Region : ap-northeast-1
+Region : ap-northeast-1 (도쿄)
 EFS : EFS-teamc (fs-29564908)
 EKS : TeamC-final
-ECR : order / delivery / cook / mypage / gateway
-Codebuild : order / delivery / cook / mypage / gateway
+ECR : order / delivery / cook / mypage / gateway 
+Codebuild : order / delivery / cook / mypage / gateway 
 ```
 * Github :</br>
 ```
