@@ -335,7 +335,7 @@ server:
             e.printStackTrace();
         }               
  ```
-![CQRS](https://user-images.githubusercontent.com/68719410/93343798-e5dee280-f86b-11ea-944d-ee6610254eee.png)
+![CQRS](https://user-images.githubusercontent.com/68719410/93420520-0ea5bd00-f8ea-11ea-8a72-b42b38488e3e.png)
 
  ```
  # 사은품지급 취소(GiftSendCancel) mypage 업데이트
@@ -360,9 +360,8 @@ server:
  ```
  - mypage에 GIFT 삭제상태 업데이트 확인
  
-![mypage_ordercancel](https://user-images.githubusercontent.com/68719410/93408239-0429fa00-f8cf-11ea-9535-72e394f763f1.png)
+![mypage_giftcancel_2](https://user-images.githubusercontent.com/68719410/93420698-73611780-f8ea-11ea-85bb-019c09af5b78.png)
 
-![mypage_giftcancel](https://user-images.githubusercontent.com/68719410/93408277-23c12280-f8cf-11ea-8ceb-67535a952f75.png)
 </br>
 </br>
 
