@@ -189,8 +189,8 @@ saga pattern :
             OrderApplication.applicationContext.getBean(myProject_LSP.external.GiftService.class).giftSend(gift);
         }
 ```
-- 주문 정상 접수
 <br>
+- 주문 정상 접수
 ![주문정상접수](https://user-images.githubusercontent.com/68719410/93407099-43a31700-f8cc-11ea-89c2-d74cedcd47e3.png)
 ![gift발행](https://user-images.githubusercontent.com/68719410/93406695-43eee280-f8cb-11ea-8fca-386636d15c20.png)
 
