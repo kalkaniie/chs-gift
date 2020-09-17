@@ -521,6 +521,8 @@ livenessProbe:
   initialDelaySeconds: 20  # 서비스 어플 기동 후 20초 뒤 시작
   periodSeconds: 30  # 30초 주기로 livenesProbe 실행
 ```
+- /mnt/aws/logs/gift-application.log 가 삭제 될 때, gift 프로세스가 kill된 후에, 자동으로 SelfHealing되는 과정 확인
+
 ![self healing_2](https://user-images.githubusercontent.com/68719410/93357433-4295c980-f87b-11ea-98b6-6f3f37a25466.png)
 ![self healing_3](https://user-images.githubusercontent.com/68719410/93357510-57725d00-f87b-11ea-8feb-40e174494c5f.png)
 ![self healing_2](https://user-images.githubusercontent.com/68719410/93357602-74a72b80-f87b-11ea-8eea-be01ccb0cd8f.png)
