@@ -191,7 +191,7 @@ saga pattern :
 ```
 - 주문 정상 접수
 
-![주문정상접수](https://user-images.githubusercontent.com/68719410/93408550-d2fdf980-f8cf-11ea-83f3-9bea034a70c4.png)
+![주문정상접수](https://user-images.githubusercontent.com/68719410/93419770-a3a7b680-f8e8-11ea-880a-a37a4020dec1.png)
 
 ![gift발행](https://user-images.githubusercontent.com/68719410/93406695-43eee280-f8cb-11ea-8fca-386636d15c20.png)
 
