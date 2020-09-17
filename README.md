@@ -132,7 +132,7 @@ public interface GiftRepository extends PagingAndSortingRepository<Gift, Long>{
 ```
 </br>
 
-## 동기식 호출과 Fallback 처리
+## 동기식 호출
 
 분석단계에서의 조건 중 하나로 주문->취소 간의 호출은 트랜잭션으로 처리. 호출 프로토콜은 Rest Repository의 REST 서비스를 FeignClient 를 이용하여 호출.
 - 사은품(gift) 서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
@@ -159,6 +159,8 @@ public interface GiftService {
         }
         
 ```        
+- GIFT 서비스에서 정상적으로 사은품이 지급되고 STATUS도 'GIFT SENDED'로 접수된다.
+![gift발행](https://user-images.githubusercontent.com/68719410/93406695-43eee280-f8cb-11ea-8fca-386636d15c20.png)
 
 
 </br>
@@ -167,38 +169,51 @@ public interface GiftService {
 
 신규 사은품지급 및 신규 사은품지급 취소는 비동기식으로 처리하여 시스템 상황에 따라 접수 및 취소가 블로킹 되지 않도록 처리 한다. 
 saga pattern : 
-1. 고객이 주문 시 gift(사은품)으로 전달되어 신규 사은품이 지급된다.
-1. 사은품 지급 완료 되면 주문상태를 order로 전달한다.
-1. 주문정보 상태가 업데이트 된다. (pub/sub)
+1. 고객이 음식 주문 시 Gift(사은품)으로 전달되어 신규 사은품이 지급된다.
+1. 사은품지급이 완료 되면 Gift서비스에서 Order서비스에 Gift 상태를 전송한다. 
+1. Order서비스는 Gift 상태를 업데이트한다. 
  
 ```
 
-# 고객이 주문 시 사은품(gift)이 지급된다.
+# 고객이 음식 주문 시, Gift에 신규지급 호출 (REST API)
  @PostPersist
     public void onPostPersist(){
         Ordered ordered = new Ordered();
         BeanUtils.copyProperties(this, ordered);
-
-        System.out.println(ordered.getStatus()+ "#######################33");
         if(!"ORDER : COOK CANCELED".equals(ordered.getStatus())){
             ordered.publishAfterCommit();
-
             /*수정*/
             Gift gift = new Gift();
             gift.setOrderId(this.getId());
             gift.setStatus("ORDER : GIFT SEND");
-
             OrderApplication.applicationContext.getBean(myProject_LSP.external.GiftService.class).giftSend(gift);
         }
+```
+- 주문 정상 접수
+![주문정상접수](https://user-images.githubusercontent.com/68719410/93407099-43a31700-f8cc-11ea-89c2-d74cedcd47e3.png)
+![gift발행](https://user-images.githubusercontent.com/68719410/93406695-43eee280-f8cb-11ea-8fca-386636d15c20.png)
 
-# 사은품 지급이 완료 되면 주문상태를 order로 전달한다.
+```
+# 사은품지급이 완료 되면 Gift서비스에서 Order서비스에 Gift 상태를 전송한다. (PUB/SUB)
+            
+     @PostPersist
+    public void onPostPersist(){
+        if("GIFT : GIFT SENDED".equals(this.getStatus())){
+            //ORDER -> GIFT SEND 경우
+            GiftSended giftSended = new GiftSended();
+            BeanUtils.copyProperties(this, giftSended);
+            giftSended.publishAfterCommit();
+            
     @PrePersist
     public void onPrePersist(){
         if("ORDER : GIFT SEND".equals(this.getStatus())){
             this.setGiftKind("Candy");
             this.setStatus("GIFT : GIFT SENDED");
             this.setSendDate(System.currentTimeMillis());
-            
+        }
+
+```          
+```            
  # 주문정보 상태가 업데이트 된다.
      @PreUpdate
     public void onPreUpdate(){
@@ -206,8 +221,21 @@ saga pattern :
             this.setGiftKind("Candy");
             this.setStatus("GIFT : GIFT SENDED");
             this.setSendDate(System.currentTimeMillis());
-```
+            
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverGiftSended_GiftInfoUpdate(@Payload GiftSended giftSended){
 
+        if(giftSended.isMe()){
+            System.out.println("##### listener GiftInfoUpdate : " + giftSended.toJson());
+            Optional<Order> orderOptional = orderRepository.findById(giftSended.getOrderId());
+            Order order = orderOptional.get();
+            if("GIFT : GIFT SENDED".equals(giftSended.getStatus())){
+                order.setGiftStatus("ORDER : GIFT SENDED SUCCESS");
+            }
+            orderRepository.save(order);      
+```
+- ORDER 서비스에서 GIFT 상태 업데이트 확인 (SAGA 패턴 확인)
+![giftsendsuccess](https://user-images.githubusercontent.com/68719410/93407599-8a454100-f8cd-11ea-91b0-45bc5fb86280.png)
 </br>
 
 ## Gateway
@@ -280,10 +308,57 @@ server:
 
                     // view 레파지 토리에 save
                     mypageRepository.save(mypage);
+                    
+         }
+# 사은품지급(GiftSend) mypage 업데이트         
+    @StreamListener(KafkaProcessor.INPUT)
+    public void whenGiftSendCancelled_then_UPDATE_7(@Payload GiftSendCancelled giftSendCancelled) {
+        try {
+            if (giftSendCancelled.isMe()) {
+                System.out.println("***************************************");
+                // view 객체 조회
+                List<Mypage> mypageList = mypageRepository.findByOrderId(giftSendCancelled.getOrderId());
+                for(Mypage mypage : mypageList){
+                    // view 객체에 이벤트의 eventDirectValue 를 set 함
+                    mypage.setGiftId(giftSendCancelled.getId());
+                    mypage.setGiftStatus(giftSendCancelled.getStatus());
+                    mypage.setGiftSendDate(giftSendCancelled.getSendDate());
+                    mypage.setGiftKind(giftSendCancelled.getGiftKind());
+                    // view 레파지 토리에 save
+                    mypageRepository.save(mypage);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }               
  ```
 ![CQRS](https://user-images.githubusercontent.com/68719410/93343798-e5dee280-f86b-11ea-944d-ee6610254eee.png)
 ![mypage-giftsended](https://user-images.githubusercontent.com/68719410/93404836-3a16b080-f8c6-11ea-8308-373150ce52f6.png)
 
+ ```
+ # 사은품지급 취소(GiftSendCancel) mypage 업데이트
+    @Autowired
+    GiftRepository giftRepository;
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverOrderCancelled_GiftSendCancel(@Payload OrderCancelled orderCancelled){
+
+        //수정
+        if(orderCancelled.isMe()){
+
+            System.out.println("##### listener GiftCancelUpdate : " + orderCancelled.toJson());
+            Optional<Gift> giftOptional = giftRepository.findByOrderId(orderCancelled.getId());
+            Gift gift = giftOptional.get();
+            if("ORDER : ORDER CANCELED".equals(orderCancelled.getStatus())){
+                gift.setStatus("GIFT : GIFT SEND CANCELLED BY ORDER CANCEL");
+
+            }
+           giftRepository.save(gift);
+
+        }
+ ```
+ - mypage에 GIFT 삭제상태 업데이트 확인
+![mypage_ordercancel](https://user-images.githubusercontent.com/68719410/93408239-0429fa00-f8cf-11ea-9535-72e394f763f1.png)
+![mypage_giftcancel](https://user-images.githubusercontent.com/68719410/93408277-23c12280-f8cf-11ea-8ceb-67535a952f75.png)
 </br>
 </br>
 
