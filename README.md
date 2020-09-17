@@ -315,6 +315,8 @@ server:
                     mypageRepository.save(mypage);
                     
          }
+```
+```
 # 사은품지급(GiftSend) mypage 업데이트         
     @StreamListener(KafkaProcessor.INPUT)
     public void whenGiftSendCancelled_then_UPDATE_7(@Payload GiftSendCancelled giftSendCancelled) {
