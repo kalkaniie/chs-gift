@@ -286,7 +286,7 @@ server:
 ```
 ![gateway_loadbalancer](https://user-images.githubusercontent.com/68719410/93343128-18d4a680-f86b-11ea-8291-b480e3deaaee.png)
 
-- Gateway 접근 확인
+- Gateway를 통한 Gift 접근 확인
 
 ![gift수행](https://user-images.githubusercontent.com/68719410/93343219-34d84800-f86b-11ea-858c-9572bbdf730b.png)
 
