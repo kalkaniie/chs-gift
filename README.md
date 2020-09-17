@@ -237,7 +237,7 @@ saga pattern :
             orderRepository.save(order);      
 ```
 - ORDER 서비스에서 GIFT 상태 업데이트 확인 (SAGA 패턴 확인)
-![giftsendsuccess](https://user-images.githubusercontent.com/68719410/93407599-8a454100-f8cd-11ea-91b0-45bc5fb86280.png)
+![giftsendsuccess](https://user-images.githubusercontent.com/68719410/93419862-d94c9f80-f8e8-11ea-97ed-e6bdefea179a.png)
 </br>
 
 ## Gateway
