@@ -360,6 +360,7 @@ server:
  ```
  - mypage에 GIFT 삭제상태 업데이트 확인
 ![mypage_ordercancel](https://user-images.githubusercontent.com/68719410/93408239-0429fa00-f8cf-11ea-9535-72e394f763f1.png)
+
 ![mypage_giftcancel](https://user-images.githubusercontent.com/68719410/93408277-23c12280-f8cf-11ea-8ceb-67535a952f75.png)
 </br>
 </br>
