@@ -419,6 +419,10 @@ metadata:
     targetCPUUtilizationPercentage: 10  # cpu사용율 10프로 초과 시 
 ```    
 * 부하테스트(Siege)를 활용한 부하 적용 후 서킷브레이킹 / 오토스케일 내역을 확인한다.
+1. 부하테스트 전, minReplicas=1로 1개의 pod만이 떠있는 것을 확인
+![gift_pod_1개](https://user-images.githubusercontent.com/68719410/93409211-4e13df80-f8d1-11ea-818e-52452f381cb7.png)
+
+1. 부하테스트하여, 오토스케일링 된 pod 내역 확인
 ```  
 HTTP/1.1 503     0.08 secs:       19 bytes ==> GET  /gifts
 HTTP/1.1 503     0.07 secs:       19 bytes ==> GET  /gifts
@@ -442,8 +446,9 @@ Throughput:                     0.08 MB/sec
 Concurrency:                  61.38
 Successful transactions:       2505
 ```  
-![gifts_circuitbreaker](https://user-images.githubusercontent.com/68719410/93346960-8551a480-f86f-11ea-8220-723f8e7d87e1.png)
-![gift_replica_3개_2](https://user-images.githubusercontent.com/68719410/93347885-8c2ce700-f870-11ea-86c2-f87a4c0284c7.png)
+![gifts_circuitbreaker](https://user-images.githubusercontent.com/68719410/93409285-85828c00-f8d1-11ea-98d0-ddc9de82154d.png)
+
+![gift_pod_3개늘어남](https://user-images.githubusercontent.com/68719410/93409351-acd95900-f8d1-11ea-819d-b6fa0fe86f38.png)
 
 </br>
 
