@@ -189,7 +189,6 @@ saga pattern :
             OrderApplication.applicationContext.getBean(myProject_LSP.external.GiftService.class).giftSend(gift);
         }
 ```
-<br>
 - 주문 정상 접수
 
 ![주문정상접수](https://user-images.githubusercontent.com/68719410/93408550-d2fdf980-f8cf-11ea-83f3-9bea034a70c4.png)
@@ -286,6 +285,7 @@ server:
   port: 8080
 ```
 ![gateway_loadbalancer](https://user-images.githubusercontent.com/68719410/93343128-18d4a680-f86b-11ea-8291-b480e3deaaee.png)
+
 ![gift수행](https://user-images.githubusercontent.com/68719410/93343219-34d84800-f86b-11ea-858c-9572bbdf730b.png)
 
 </br>
